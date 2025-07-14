@@ -15,7 +15,6 @@ export const createPaymentIntent: RequestHandler = async (req, res) => {
       });
     }
 
-    // Create a PaymentIntent with the order amount and currency
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(amount), // Ensure amount is an integer
       currency,
