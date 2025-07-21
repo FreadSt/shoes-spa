@@ -13,6 +13,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import { AuthProvider } from "@/context/AuthContext";
 import PrivateRoute from "@/components/PrivateRoute";
+import ReferralDashboard from "@/pages/ReferralDashboard";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const App = () => (
               </PrivateRoute>
             } />
             <Route path="/login" element={<Login />} />
+            <Route path="/dashboard" element={<ReferralDashboard />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="*" element={<NotFound />} /> {/* 404 для всех остальных маршрутов */}
           </Routes>

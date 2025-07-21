@@ -10,3 +10,10 @@
 export interface DemoResponse {
   message: string;
 }
+
+export interface ReferralData {
+  userId: string;
+  referralCode: string;
+  purchaseTimestamp: number;
+  status: 'pending' | 'active' | 'used';
+}

@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
+import { generateReferralCode, getReferralData } from "./routes/referral";
 import {
   createPaymentIntent,
   confirmPayment,
@@ -32,6 +33,9 @@ export function createServer() {
 
 
   app.get("/api/demo", handleDemo);
+
+  app.post("/api/referral", generateReferralCode);
+  app.get("/api/referral/:userId", getReferralData)
 
   // Stripe API routes
   app.post("/api/create-payment-intent", createPaymentIntent);
