@@ -8,7 +8,7 @@ dotenv.config();
 // VITE_STRIPE_PUBLISHABLE_KEY=pk_test_...
 // The server uses STRIPE_SECRET_KEY, the client uses VITE_STRIPE_PUBLISHABLE_KEY
 
-const stripe = new Stripe("sk_test_51RGRsTQbiHOSieT9XUx3ZlXvZOKbefBG18313IEyP6zCEowx70lx8TqQca5MF07CCNcvLgZqCNO0S7q92j3UCVBH00eGbrQ8Ts", {
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2025-06-30.basil",
 });
 
