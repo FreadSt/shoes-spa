@@ -10,13 +10,14 @@ import img2 from "../assets/images/image2.JPG"
 import img3 from "../assets/images/image3.JPG"
 import img4 from "../assets/images/image4.JPG"
 import img5 from "../assets/images/image5.JPG"
+import OrderModal from "@/components/OrderModal";
 
 const product = {
   id: 1,
   name: "Nike Air Max 270",
   brand: "Nike",
-  price: 149.99,
-  originalPrice: 179.99,
+  price: 1,
+  originalPrice: 1,
   discount: 17,
   rating: 4.8,
   reviews: 234,
@@ -62,19 +63,14 @@ export default function Product() {
   const [selectedColor, setSelectedColor] = useState(product.colors[0]);
   const [selectedSize, setSelectedSize] = useState("");
   const [quantity, setQuantity] = useState(1);
+  const [orderModalOpen, setOrderModalOpen] = useState(false);
 
   const handleBuyNow = () => {
     if (!selectedSize) {
       alert("Please select a size");
       return;
     }
-    // Buy now logic here
-    console.log("Buy now:", {
-      product: product.name,
-      color: selectedColor.name,
-      size: selectedSize,
-      quantity,
-    });
+    setOrderModalOpen(true);
   };
 
   return (
@@ -217,18 +213,21 @@ export default function Product() {
 
             <div className="space-y-4">
               <Button
-                onClick={handleBuyNow}
-                disabled={!product.inStock}
-                variant="outline"
                 size="lg"
-                className="w-full border-brand-orange text-brand-orange hover:bg-brand-orange"
+                className="bg-brand-orange hover:bg-brand-orange-dark text-white px-8"
+                onClick={handleBuyNow}
               >
-                Придбати
+                Купити
               </Button>
             </div>
           </div>
         </div>
       </div>
+      <OrderModal
+        open={orderModalOpen}
+        onOpenChange={setOrderModalOpen}
+        product={{ name: product.name, price: product.price }}
+      />
     </div>
   );
 }
