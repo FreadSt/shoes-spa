@@ -11,13 +11,14 @@ import img3 from "../assets/images/image3.JPG"
 import img4 from "../assets/images/image4.JPG"
 import img5 from "../assets/images/image5.JPG"
 import OrderModal from "@/components/OrderModal";
+import { useEffect } from "react";
 
 const product = {
   id: 1,
   name: "Nike Air Max 270",
   brand: "Nike",
-  price: 1,
-  originalPrice: 1,
+  price: 5,
+  originalPrice: 7,
   discount: 17,
   rating: 4.8,
   reviews: 234,
@@ -64,6 +65,14 @@ export default function Product() {
   const [selectedSize, setSelectedSize] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [orderModalOpen, setOrderModalOpen] = useState(false);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("ref") || localStorage.getItem("referralCode");
+    setReferralCode(code);
+  }, []);
 
   const handleBuyNow = () => {
     if (!selectedSize) {
@@ -227,7 +236,18 @@ export default function Product() {
         open={orderModalOpen}
         onOpenChange={setOrderModalOpen}
         product={{ name: product.name, price: product.price }}
+        referralCode={referralCode}
       />
+      {showLoginPrompt && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+          <div className="bg-white p-8 rounded shadow-lg text-center">
+            <h2 className="text-xl font-bold mb-4">Щоб скористатися реферальною програмою, увійдіть або зареєструйтеся</h2>
+            <Button className="bg-brand-orange text-white px-8" onClick={() => window.location.href = "/login"}>Увійти</Button>
+            <Button variant="outline" className="ml-4" onClick={() => window.location.href = "/signup"}>Зареєструватися</Button>
+            <Button variant="ghost" className="block mt-4 mx-auto" onClick={() => setShowLoginPrompt(false)}>Скасувати</Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,34 +1,37 @@
 'use client'
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '@/context/AuthContext.tsx'; // Adjust the import path as needed
-import { ReferralData } from '@shared/api.ts';
+
+const activationDelay = 10 * 1000; // 10 seconds for testing
 
 const ReferralDashboard: React.FC = () => {
-  const { user } = useAuth(); // Get the current user from your AuthContext
-  const [referralData, setReferralData] = useState<ReferralData | null>(null);
+  const [referralData, setReferralData] = useState<any>(null);
+  const [referredUsers, setReferredUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const activationDelay = 10 * 1000; // 10 seconds for testing (use 17 * 24 * 60 * 60 * 1000 for 17 days)
-
   useEffect(() => {
     const fetchReferralData = async () => {
-      if (!user) {
+      if (!user?.email) {
         setLoading(false);
         return;
       }
-
       try {
-        const response = await fetch(`/api/referral/${user.uid}`);
+        // Get the user's referral data
+        const response = await fetch(`/api/referral/${encodeURIComponent(user.email)}`);
         if (!response.ok) {
-          if (response.status === 404) {
-            setReferralData(null);
-          } else {
-            throw new Error(`Error fetching referral data: ${response.statusText}`);
+          setReferralData(null);
+          setLoading(false);
+          return;
+        }
+        const data = await response.json();
+        setReferralData(data);
+        // Fetch referred users by referral code
+        if (data.referralCode) {
+          const referredRes = await fetch(`/api/referred/${data.referralCode}`);
+          if (referredRes.ok) {
+            const referred = await referredRes.json();
+            setReferredUsers(referred);
           }
-        } else {
-          const data: ReferralData = await response.json();
-          setReferralData(data);
         }
       } catch (err: any) {
         setError(err.message);
@@ -36,42 +39,56 @@ const ReferralDashboard: React.FC = () => {
         setLoading(false);
       }
     };
-
     fetchReferralData();
   }, [user]);
 
-  if (loading) {
-    return <div>Loading referral data...</div>;
-  }
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
-
-  if (!user) {
-    return <div>Please log in to view your referral information.</div>;
-  }
-
-  if (!referralData) {
-    return <div>No referral data found for your account.</div>;
-  }
+  if (loading) return <div>Loading referral data...</div>;
+  if (error) return <div>Error: {error}</div>;
+  if (!user) return <div>Please log in to view your referral information.</div>;
+  if (!referralData) return <div>No referral data found for your account.</div>;
 
   const isReferralActive = Date.now() - referralData.purchaseTimestamp >= activationDelay;
-  const referralLink = `${window.location.origin}/referral?code=${referralData.referralCode}`;
+  const referralLink = `${window.location.origin}/product?ref=${referralData.referralCode}`;
 
   return (
-    <div>
-      <h2>Referral Information</h2>
-      <p>Your Referral Code: <strong>{referralData.referralCode}</strong></p>
-      {
-        isReferralActive ? (
+    <div className="max-w-2xl mx-auto p-6">
+      <h2 className="text-2xl font-bold mb-4">Referral Dashboard</h2>
+      <div className="mb-4">
+        <p>Your Referral Code: <strong>{referralData.referralCode}</strong></p>
+        {isReferralActive ? (
           <div>
             <p>Your referral link is active:</p>
-            <a href={referralLink} target="_blank" rel="noopener noreferrer">{referralLink}</a>
+            <a href={referralLink} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">{referralLink}</a>
           </div>
         ) : (
           <p>Your referral link will be active after the delay period.</p>
-        )
-      }
+        )}
+      </div>
+      <div>
+        <h3 className="text-lg font-semibold mb-2">Referred Users</h3>
+        {referredUsers.length === 0 ? (
+          <p>No users have purchased using your referral link yet.</p>
+        ) : (
+          <table className="min-w-full border text-sm">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="border px-4 py-2">Email</th>
+                <th className="border px-4 py-2">Status</th>
+                <th className="border px-4 py-2">Purchase Time</th>
+              </tr>
+            </thead>
+            <tbody>
+              {referredUsers.map((user, idx) => (
+                <tr key={idx}>
+                  <td className="border px-4 py-2">{user.referredEmail}</td>
+                  <td className="border px-4 py-2">{user.status}</td>
+                  <td className="border px-4 py-2">{new Date(user.timestamp).toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
     </div>
   );
 };

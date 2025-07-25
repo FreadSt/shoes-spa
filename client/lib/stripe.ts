@@ -29,9 +29,10 @@ export const createPaymentIntent = async (amount: number, currency = "usd") => {
 };
 
 export const createCheckoutSession = async (params: {
-  price: string;
   quantity: number;
+  price: string;
   customer_email: string;
+  referralCode: string
 }) => {
   try {
     const response = await fetch("/api/create-checkout-session", {

@@ -1,13 +1,13 @@
 import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
-import { generateReferralCode, getReferralData } from "./routes/referral";
+import { generateReferralCode, getReferralData, getReferredUsers } from "./routes/referral";
 import {
   createPaymentIntent,
   confirmPayment,
   createCustomer,
   createCheckoutSession,
-  debugPrice,
+  debugPrice, refundOrder,
 } from "./routes/stripe";
 import * as stripe from "stripe";
 
@@ -35,7 +35,10 @@ export function createServer() {
   app.get("/api/demo", handleDemo);
 
   app.post("/api/referral", generateReferralCode);
-  app.get("/api/referral/:userId", getReferralData)
+  app.get("/api/referral/:userId", getReferralData);
+  app.get("/api/referred/:referralCode", getReferredUsers);
+
+  app.post("/api/refund/:orderId", refundOrder);
 
   // Stripe API routes
   app.post("/api/create-payment-intent", createPaymentIntent);

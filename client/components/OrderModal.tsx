@@ -18,6 +18,7 @@ interface OrderModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   product: { name: string; price: number };
+  referralCode?: string | null;
 }
 
 type OrderFormValues = {
@@ -28,7 +29,7 @@ type OrderFormValues = {
 };
 
 
-const OrderModal: React.FC<OrderModalProps> = ({ open, onOpenChange, product }) => {
+const OrderModal: React.FC<OrderModalProps> = ({ open, onOpenChange, product, referralCode }) => {
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<OrderFormValues>();
   const { toast } = useToast();
 
@@ -36,10 +37,13 @@ const OrderModal: React.FC<OrderModalProps> = ({ open, onOpenChange, product }) 
     try {
       // Use the utility function to create a Checkout Session
       const { sessionId } = await createCheckoutSession({
-        price: "price_1RlTZMQbiHOSieT9fW7wWVV1", // <-- Use your real Stripe Price ID here
+        price: "price_1RnK1iQbiHOSieT9wsaQ8nOK", // <-- Use your real Stripe Price ID here
         quantity: 1,
         customer_email: data.email,
+        referralCode: referralCode,
       });
+      // Store the purchase email for referral link lookup
+      localStorage.setItem("lastPurchaseEmail", data.email);
       const stripe = await stripePromise;
       if (!stripe) throw new Error("Stripe failed to load");
       const { error } = await stripe.redirectToCheckout({ sessionId });
@@ -82,7 +86,7 @@ const OrderModal: React.FC<OrderModalProps> = ({ open, onOpenChange, product }) 
               {isSubmitting ? "Обробка..." : `Оплатити $${product.price}`}
             </Button>
             <DialogClose asChild>
-              <Button variant="outline" className="w-full mt-2">Скасувати</Button>
+              <Button variant="outline" className="w-full">Скасувати</Button>
             </DialogClose>
           </DialogFooter>
         </form>
